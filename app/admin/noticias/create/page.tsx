@@ -14,8 +14,57 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  createTheme,
+  ThemeProvider,
 } from "@mui/material";
+import styled from "@emotion/styled";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Layout from "../../../../components/Layout";
+
+const theme = createTheme();
+
+const StyledPaper = styled(Paper)`
+  padding: 32px;
+  margin-top: 32px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  border-radius: 4px;
+`;
+
+const StyledFormControl = styled(FormControl)`
+  margin-top: 16px;
+  margin-bottom: 16px;
+`;
+
+const StyledButton = styled(Button)`
+  margin-top: 24px;
+  padding: 12px;
+  background-color: rgb(6, 2, 122)};
+  color: rgb(0, 0, 0);
+`;
+
+const FileInput = styled.input`
+  margin-top: 16px;
+`;
+
+const TypographyCenter = styled(Typography)`
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: bold;
+`;
+
+const StyledDatePicker = styled(DatePicker)`
+  width: 100%;
+  padding: 16.5px 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  font-size: 1rem;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.87);
+  }
+`;
 
 const authorOptions = [
   "Presidente Nacional",
@@ -56,7 +105,7 @@ const authorOptions = [
 
 export default function CreateNoticia() {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState<Date | null>(null);
   const [markdown, setMarkdown] = useState("");
   const [resumo, setResumo] = useState("");
   const [author, setAuthor] = useState("");
@@ -80,14 +129,14 @@ export default function CreateNoticia() {
       .toLowerCase()
       .slice(0, 15);
 
-    const filename = `${date.replace(/\s/g, "")}-${processedTitle}.md`;
-    const imageFilename = `img${date.replace(/\s/g, "")}-${processedTitle}${image ? image.name.slice(image.name.lastIndexOf(".")) : ""}`;
+    const filename = `${date?.toISOString().split("T")[0]}-${processedTitle}.md`;
+    const imageFilename = `img${date?.toISOString().split("T")[0]}-${processedTitle}${image ? image.name.slice(image.name.lastIndexOf(".")) : ""}`;
     const finalAuthor = author === "Outros" ? otherAuthor : author;
 
     const formData = new FormData();
     formData.append("title", title); // Use the title as typed for CSV
     formData.append("filename", filename); // Use processed filename for markdown
-    formData.append("date", date);
+    formData.append("date", date?.toISOString() || "");
     formData.append("markdown", markdown);
     formData.append("resumo", resumo);
     formData.append("author", finalAuthor);
@@ -111,15 +160,10 @@ export default function CreateNoticia() {
   return (
     <Layout>
       <Container component="main" maxWidth="md">
-        <Paper elevation={3} className="p-8 shadow-lg">
-          <Typography
-            variant="h4"
-            component="h1"
-            gutterBottom
-            className="text-center"
-          >
+        <StyledPaper>
+          <TypographyCenter variant="h4" component="h1" gutterBottom>
             Create New Notícia
-          </Typography>
+          </TypographyCenter>
           <TextField
             label="Title"
             value={title}
@@ -127,12 +171,30 @@ export default function CreateNoticia() {
             fullWidth
             margin="normal"
           />
-          <TextField
-            label="Date (DD MM YYYY)"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            fullWidth
-            margin="normal"
+          <StyledFormControl fullWidth>
+            <InputLabel>Author</InputLabel>
+            <Select value={author} onChange={(e) => setAuthor(e.target.value)}>
+              {authorOptions.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          </StyledFormControl>
+          {author === "Outros" && (
+            <TextField
+              label="Specify Author"
+              value={otherAuthor}
+              onChange={(e) => setOtherAuthor(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+          )}
+          <StyledDatePicker
+            selected={date}
+            onChange={(newDate) => setDate(newDate)}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="Select a date"
           />
           <TextField
             label="Resumo"
@@ -151,26 +213,7 @@ export default function CreateNoticia() {
             fullWidth
             margin="normal"
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Author</InputLabel>
-            <Select value={author} onChange={(e) => setAuthor(e.target.value)}>
-              {authorOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {author === "Outros" && (
-            <TextField
-              label="Specify Author"
-              value={otherAuthor}
-              onChange={(e) => setOtherAuthor(e.target.value)}
-              fullWidth
-              margin="normal"
-            />
-          )}
-          <input type="file" onChange={handleImageChange} />
+          <FileInput type="file" onChange={handleImageChange} />
           <FormControlLabel
             control={
               <Switch
@@ -180,16 +223,10 @@ export default function CreateNoticia() {
             }
             label="Forçar Página Inicial"
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            fullWidth
-            className="mt-4"
-          >
+          <StyledButton variant="contained" onClick={handleSubmit} fullWidth>
             Submit
-          </Button>
-        </Paper>
+          </StyledButton>
+        </StyledPaper>
       </Container>
     </Layout>
   );
