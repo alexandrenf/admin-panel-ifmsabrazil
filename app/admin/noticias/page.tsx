@@ -32,40 +32,50 @@ export default function Noticias() {
   const pathname = usePathname();
 
   const fetchData = async () => {
-    console.log("Fetching data...");
     try {
       const response = await fetch("/api/fetch-noticias");
-      console.log("Fetch response:", response);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const result = await response.json();
       const csvContent = result.csvContent;
-      console.log("CSV data:", csvContent);
-
       const parsed = Papa.parse<Noticia>(csvContent, {
         header: true,
         skipEmptyLines: true,
         transformHeader: (header) => header.trim(),
         transform: (value, header) => value.trim(),
       });
-      console.log("Parsed data:", parsed);
-
       if (parsed.errors.length > 0) {
         console.error("Parsing errors:", parsed.errors);
       }
-
       setData(parsed.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
+  const handleDelete = async (index: number) => {
+    try {
+      const response = await fetch("/api/delete-noticia", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ index }),
+      });
+      if (response.ok) {
+        fetchData();
+      } else {
+        console.error("Failed to delete notícia");
+      }
+    } catch (error) {
+      console.error("Error deleting notícia:", error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
-  }, [pathname]); // Re-fetch data when the pathname changes
+  }, [pathname]);
 
   return (
     <Layout>
@@ -89,6 +99,7 @@ export default function Noticias() {
                 <TableCell>Title</TableCell>
                 <TableCell>Summary</TableCell>
                 <TableCell>Image</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -104,6 +115,15 @@ export default function Noticias() {
                       alt={row.titulo}
                       width="100"
                     />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleDelete(index)}
+                    >
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
