@@ -37,41 +37,35 @@ const theme = createTheme({
   },
 });
 
-const Main = styled("main")<{ open: boolean }>(({ theme, open }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  marginLeft: open ? drawerWidth : 0,
-  transition: theme.transitions.create(["margin", "width"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  width: open ? `calc(100% - ${drawerWidth}px)` : "100%",
-}));
+const Main = styled("main")`
+  flex-grow: 1;
+  padding: 24px; /* Use a fixed value for padding */
+  margin-left: ${(props) => (props.open ? drawerWidth : 0)}px;
+  transition: margin 195ms cubic-bezier(0.4, 0, 0.6, 1) 0ms,
+    width 195ms cubic-bezier(0.4, 0, 0.6, 1) 0ms; /* Use fixed values for transitions */
+  width: ${(props) => (props.open ? `calc(100% - ${drawerWidth}px)` : "100%")};
+`;
 
-const AppBarStyled = styled(AppBar)<{ open: boolean }>(({ theme, open }) => ({
-  transition: theme.transitions.create(["margin", "width"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: drawerWidth,
-  }),
-}));
+const AppBarStyled = styled(AppBar)`
+  transition: margin 195ms cubic-bezier(0.4, 0, 0.6, 1) 0ms,
+    width 195ms cubic-bezier(0.4, 0, 0.6, 1) 0ms; /* Use fixed values for transitions */
+  ${(props) =>
+    props.open &&
+    `
+      width: calc(100% - ${drawerWidth}px);
+      margin-left: ${drawerWidth}px;
+    `}
+`;
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-  justifyContent: "flex-end",
-}));
+const DrawerHeader = styled("div")`
+  display: flex;
+  align-items: center;
+  padding: 0 8px; /* Use a fixed value for padding */
+  ${(props) => props.theme.mixins.toolbar};
+  justify-content: flex-end;
+`;
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(true);
   const router = useRouter();
@@ -88,7 +82,7 @@ export default function Layout({ children }: LayoutProps) {
     setDrawerOpen(true);
   };
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path) => {
     router.push(path);
     if (mobileOpen) {
       handleDrawerToggle();
@@ -97,7 +91,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const drawer = (
     <div>
-      <DrawerHeader>
+      <DrawerHeader theme={theme}>
         <IconButton onClick={handleDrawerClose}>
           {theme.direction === "ltr" ? (
             <ChevronLeftIcon />
@@ -113,7 +107,10 @@ export default function Layout({ children }: LayoutProps) {
             key={text}
             onClick={() =>
               handleNavigation(
-                `/admin/${text.toLowerCase().replace("í", "i").replace("ã", "a")}`,
+                `/admin/${text
+                  .toLowerCase()
+                  .replace("í", "i")
+                  .replace("ã", "a")}`
               )
             }
           >
@@ -176,7 +173,7 @@ export default function Layout({ children }: LayoutProps) {
         </Drawer>
       </Box>
       <Main open={drawerOpen}>
-        <DrawerHeader />
+        <DrawerHeader theme={theme} />
         {children}
       </Main>
     </ThemeProvider>

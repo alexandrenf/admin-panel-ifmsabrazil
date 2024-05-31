@@ -21,6 +21,7 @@ import styled from "@emotion/styled";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Layout from "../../../../components/Layout";
+import { TypographyProps } from '@mui/material/Typography';
 
 const theme = createTheme({
   palette: {
@@ -64,7 +65,9 @@ const FileInput = styled.input`
   margin-top: 24px;
 `;
 
-const TypographyCenter = styled(Typography)`
+const TypographyCenter = styled((props: TypographyProps) => (
+  <Typography {...props} />
+))`
   margin-bottom: 24px;
   text-align: center;
   font-weight: bold;
@@ -202,7 +205,7 @@ export default function CreateNoticia() {
         <Container component="main" maxWidth="md">
           <StyledPaper>
             <TypographyCenter variant="h4" component="h1" gutterBottom>
-              Create New Notícia
+              Criar nova notícia
             </TypographyCenter>
             <TextField
               label="Title"
@@ -238,7 +241,7 @@ export default function CreateNoticia() {
             )}
             <StyledDatePicker
               selected={date}
-              onChange={(newDate) => setDate(newDate)}
+              onChange={(newDate: Date | null) => setDate(newDate || undefined)}
               dateFormat="dd/MM/yyyy"
               placeholderText="Select a date"
             />

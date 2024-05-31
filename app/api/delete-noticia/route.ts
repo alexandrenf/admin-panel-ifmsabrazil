@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import Papa from "papaparse";
 
+// Define the Noticia type based on the structure of your CSV data
+type Noticia = {
+  title: string;
+  date: string;
+  markdown: string;
+  resumo: string;
+  author: string;
+  imageFilename?: string;
+  forcarPaginaInicial: string;
+};
+
+
 export async function POST(req: NextRequest) {
   const { index } = await req.json();
   const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
