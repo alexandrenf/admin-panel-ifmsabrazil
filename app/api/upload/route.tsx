@@ -4,7 +4,11 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const title = formData.get("title") as string;
   const filename = formData.get("filename") as string;
-  const date = formData.get("date") as string;
+  const date = new Date(formData.get("date") as string).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).replace(/\//g, ' '); // format date as '31 05 2024'
   const markdown = formData.get("markdown") as string;
   const resumo = formData.get("resumo") as string;
   const author = formData.get("author") as string;
@@ -173,7 +177,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ message: "File successfully uploaded" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
       { message: "Error uploading file", error: error.message },
