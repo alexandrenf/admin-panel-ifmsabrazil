@@ -12,6 +12,11 @@ import {
   Paper,
   Typography,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import Papa from "papaparse";
 import Layout from "../../../components/Layout";
@@ -28,6 +33,8 @@ interface Noticia {
 
 export default function Noticias() {
   const [data, setData] = useState<Noticia[]>([]);
+  const [open, setOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -71,6 +78,23 @@ export default function Noticias() {
     } catch (error) {
       console.error("Error deleting notícia:", error);
     }
+  };
+
+  const handleOpenDialog = (index: number) => {
+    setDeleteIndex(index);
+    setOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+    setDeleteIndex(null);
+  };
+
+  const confirmDelete = () => {
+    if (deleteIndex !== null) {
+      handleDelete(deleteIndex);
+    }
+    handleCloseDialog();
   };
 
   useEffect(() => {
@@ -120,7 +144,7 @@ export default function Noticias() {
                     <Button
                       variant="contained"
                       color="secondary"
-                      onClick={() => handleDelete(index)}
+                      onClick={() => handleOpenDialog(index)}
                     >
                       Delete
                     </Button>
@@ -130,6 +154,27 @@ export default function Noticias() {
             </TableBody>
           </Table>
         </Paper>
+        <Dialog
+          open={open}
+          onClose={handleCloseDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">Confirm Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete this notícia?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={confirmDelete} color="secondary" autoFocus>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Layout>
   );
