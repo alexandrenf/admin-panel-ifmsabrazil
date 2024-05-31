@@ -1,256 +1,180 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, ReactNode } from "react";
 import {
-  Container,
-  TextField,
-  Button,
-  Paper,
+  AppBar,
+  Toolbar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  CssBaseline,
+  IconButton,
   Typography,
-  FormControlLabel,
-  Switch,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  createTheme,
+  Box,
   ThemeProvider,
+  createTheme,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import styled from "@emotion/styled";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import Layout from "../../../../components/Layout";
+
+const drawerWidth = 240;
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#6200ea",
+      main: '#6200ea',
     },
     secondary: {
-      main: "#03dac6",
+      main: '#03dac6',
     },
   },
   typography: {
-    fontFamily: "Poppins, sans-serif",
+    fontFamily: 'Poppins, sans-serif',
   },
 });
 
-const StyledPaper = styled(Paper)`
-  padding: 40px;
-  margin-top: 40px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
-  border-radius: 8px;
-  background-color: #fff;
-`;
+const Main = styled("main")<{ open: boolean }>(({ theme, open }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+  marginLeft: open ? drawerWidth : 0,
+  transition: theme.transitions.create(["margin", "width"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  width: open ? `calc(100% - ${drawerWidth}px)` : "100%",
+}));
 
-const StyledFormControl = styled(FormControl)`
-  margin-top: 24px;
-  margin-bottom: 24px;
-`;
+const AppBarStyled = styled(AppBar)<{ open: boolean }>(({ theme, open }) => ({
+  transition: theme.transitions.create(["margin", "width"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: drawerWidth,
+  }),
+}));
 
-const StyledButton = styled(Button)`
-  margin-top: 32px;
-  padding: 14px;
-  font-size: 16px;
-  background-color: #6200ea;
-  color: #fff;
-  &:hover {
-    background-color: #3700b3;
-  }
-`;
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-end',
+}));
 
-const FileInput = styled.input`
-  margin-top: 24px;
-`;
+interface LayoutProps {
+  children: ReactNode;
+}
 
-const TypographyCenter = styled(Typography)`
-  margin-bottom: 24px;
-  text-align: center;
-  font-weight: bold;
-  color: #6200ea;
-`;
-
-const StyledDatePicker = styled(DatePicker)`
-  width: 100%;
-  padding: 16.5px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.23);
-  font-size: 1rem;
-  margin-top: 24px;
-  margin-bottom: 16px;
-  &:hover {
-    border-color: rgba(0, 0, 0, 0.87);
-  }
-`;
-
-const ImagePreview = styled.img`
-  width: 100%;
-  max-width: 300px;
-  margin-top: 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16);
-`;
-
-const authorOptions = [
-  // ... (list of author options)
-];
-
-export default function CreateNoticia() {
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState<Date | null>(null);
-  const [markdown, setMarkdown] = useState("");
-  const [resumo, setResumo] = useState("");
-  const [author, setAuthor] = useState("");
-  const [otherAuthor, setOtherAuthor] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [forcarPaginaInicial, setForcarPaginaInicial] = useState(false);
+export default function Layout({ children }: LayoutProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    if (image) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(image);
-    } else {
-      setImagePreview(null);
-    }
-  }, [image]);
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImage(e.target.files[0]);
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+    if (mobileOpen) {
+      handleDrawerToggle();
     }
   };
 
-  const handleSubmit = async () => {
-    const processedTitle = title
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Remove accents
-      .replace(/[^a-zA-Z0-9 ]/g, "") // Remove non-alphanumeric characters
-      .replace(/\s+/g, "-") // Replace spaces with hyphens
-      .toLowerCase()
-      .slice(0, 15);
-
-    const filename = `${date?.toISOString().split("T")[0]}-${processedTitle}.md`;
-    const imageFilename = `img${date?.toISOString().split("T")[0]}-${processedTitle}${image ? image.name.slice(image.name.lastIndexOf(".")) : ""}`;
-    const finalAuthor = author === "Outros" ? otherAuthor : author;
-
-    const formData = new FormData();
-    formData.append("title", title); // Use the title as typed for CSV
-    formData.append("filename", filename); // Use processed filename for markdown
-    formData.append("date", date?.toISOString() || "");
-    formData.append("markdown", markdown);
-    formData.append("resumo", resumo);
-    formData.append("author", finalAuthor);
-    formData.append("image", image || "");
-    formData.append("imageFilename", imageFilename);
-    formData.append("forcarPaginaInicial", forcarPaginaInicial ? "sim" : "");
-
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (response.ok) {
-      alert("Notícia created successfully!");
-      router.push("/admin/noticias");
-    } else {
-      alert("Failed to create notícia");
-    }
-  };
+  const drawer = (
+    <div>
+      <DrawerHeader>
+        <IconButton onClick={handleDrawerClose}>
+          {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </IconButton>
+      </DrawerHeader>
+      <List>
+        {["Notícias", "EBs", "Páginas"].map((text) => (
+          <ListItem
+            button
+            key={text}
+            onClick={() =>
+              handleNavigation(
+                `/admin/${text.toLowerCase().replace("í", "i").replace("ã", "a")}`
+              )
+            }
+          >
+            <ListItemText primary={text} />
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  );
 
   return (
     <ThemeProvider theme={theme}>
-      <Layout>
-        <Container component="main" maxWidth="md">
-          <StyledPaper>
-            <TypographyCenter variant="h4" component="h1" gutterBottom>
-              Create New Notícia
-            </TypographyCenter>
-            <TextField
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-            <StyledFormControl fullWidth>
-              <InputLabel>Author</InputLabel>
-              <Select
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                variant="outlined"
-              >
-                {authorOptions.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-            </StyledFormControl>
-            {author === "Outros" && (
-              <TextField
-                label="Specify Author"
-                value={otherAuthor}
-                onChange={(e) => setOtherAuthor(e.target.value)}
-                fullWidth
-                margin="normal"
-                variant="outlined"
-              />
-            )}
-            <StyledDatePicker
-              selected={date}
-              onChange={(newDate) => setDate(newDate)}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="Select a date"
-            />
-            <TextField
-              label="Resumo"
-              value={resumo}
-              onChange={(e) => setResumo(e.target.value)}
-              inputProps={{ maxLength: 150 }}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              label="Markdown"
-              multiline
-              rows={10}
-              value={markdown}
-              onChange={(e) => setMarkdown(e.target.value)}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-            <Typography variant="h6" component="p" gutterBottom>
-              Image Upload
-            </Typography>
-            <FileInput type="file" onChange={handleImageChange} />
-            {imagePreview && (
-              <ImagePreview src={imagePreview} alt="Image Preview" />
-            )}
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={forcarPaginaInicial}
-                  onChange={(e) => setForcarPaginaInicial(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Forçar Página Inicial"
-            />
-            <StyledButton variant="contained" onClick={handleSubmit} fullWidth>
-              Submit
-            </StyledButton>
-          </StyledPaper>
-        </Container>
-      </Layout>
+      <CssBaseline />
+      <AppBarStyled position="fixed" open={drawerOpen}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={drawerOpen ? handleDrawerClose : handleDrawerOpen}
+            sx={{ mr: 2 }}
+          >
+            {drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />}
+          </IconButton>
+          <Typography variant="h6" noWrap>
+            Admin Panel
+          </Typography>
+        </Toolbar>
+      </AppBarStyled>
+      <Box component="nav">
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="persistent"
+          open={drawerOpen}
+          sx={{
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+      <Main open={drawerOpen}>
+        <DrawerHeader />
+        {children}
+      </Main>
     </ThemeProvider>
   );
 }
