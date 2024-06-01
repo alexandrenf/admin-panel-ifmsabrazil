@@ -27,7 +27,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "components/Layout.jsx",
-    "app/api/fetch-noticias/route.tsx"
+    "app/api/fetch-noticias/route.ts"
   ],
   "exclude": ["node_modules"]
 }

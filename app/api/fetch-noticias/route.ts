@@ -5,6 +5,11 @@ export async function GET(req: NextRequest) {
   const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
   const GITHUB_API_URL = `https://api.github.com/repos/alexandrenf/dataifmsabrazil/contents/noticias.csv`;
 
+  // Extract cache buster from the query parameters
+  const { searchParams } = new URL(req.url);
+  const cacheBuster = searchParams.get('t');
+  console.log('Cache Buster:', cacheBuster); // For debugging purposes
+
   try {
     const response = await fetch(GITHUB_API_URL, {
       headers: {

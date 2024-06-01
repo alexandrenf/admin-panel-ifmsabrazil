@@ -39,7 +39,8 @@ export default function Noticias() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/fetch-noticias");
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/fetch-noticias?t=${timestamp}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
