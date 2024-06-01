@@ -21,7 +21,12 @@ import styled from "@emotion/styled";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Layout from "../../../../components/Layout";
+import dynamic from "next/dynamic"; // Needed to dynamically load the markdown editor
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import { TypographyProps } from '@mui/material/Typography';
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 const theme = createTheme({
   palette: {
@@ -254,16 +259,9 @@ export default function CreateNoticia() {
               margin="normal"
               variant="outlined"
             />
-            <TextField
-              label="Markdown"
-              multiline
-              rows={10}
-              value={markdown}
-              onChange={(e) => setMarkdown(e.target.value)}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
+            <div data-color-mode="light">
+              <MDEditor value={markdown} onChange={setMarkdown} height={400} />
+            </div>
             <Typography variant="h6" component="p" gutterBottom>
               Image Upload
             </Typography>

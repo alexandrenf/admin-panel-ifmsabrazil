@@ -1,7 +1,8 @@
+// pages/api/fetch-noticias.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { parse } from 'csv-parse/sync';
 
-export async function GET() {
+export async function GET(req: NextRequest, res: NextResponse) {
   const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
   const cacheBuster = new Date().getTime(); // Cache buster using current timestamp
   const GITHUB_API_URL = `https://api.github.com/repos/alexandrenf/dataifmsabrazil/contents/noticias.csv?cb=${cacheBuster}`;

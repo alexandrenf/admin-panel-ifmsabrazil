@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { stringify } from 'csv-stringify/sync'; // Use csv-stringify for correct CSV formatting
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -48,8 +49,17 @@ export async function POST(req: NextRequest) {
     const csvContent = Buffer.from(csvData.content, "base64").toString("utf-8");
 
     // Create the new CSV entry
-    const newCsvEntry = `${date},${author},${title},${resumo},https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}/noticias/${filename},https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}/noticias/${imageFilename},${forcarPaginaInicial}`;
-    const updatedCsv = `${csvContent.trim()}\n${newCsvEntry}`;
+    const newCsvEntry = [
+      date,
+      author,
+      title,
+      resumo,
+      `https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}/noticias/${filename}`,
+      `https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}/noticias/${imageFilename}`,
+      forcarPaginaInicial,
+    ];
+
+    const updatedCsvContent = csvContent + '\n' + stringify([newCsvEntry], { quoted: true });
 
     // Check if the markdown file already exists
     let existingFileSha = "";
@@ -87,7 +97,7 @@ export async function POST(req: NextRequest) {
     if (!markdownResponse.ok) {
       console.error("Markdown response error:", markdownResponseData);
       throw new Error(
-        `GitHub API responded with status ${markdownResponse.status}`,
+        `GitHub API responded with status ${markdownResponse.status}`
       );
     }
 
@@ -130,7 +140,7 @@ export async function POST(req: NextRequest) {
       if (!imageResponse.ok) {
         console.error("Image response error:", imageResponseData);
         throw new Error(
-          `GitHub API responded with status ${imageResponse.status}`,
+          `GitHub API responded with status ${imageResponse.status}`
         );
       }
     }
@@ -159,7 +169,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         message: `Update CSV for ${title}`,
-        content: Buffer.from(updatedCsv, "utf-8").toString("base64"),
+        content: Buffer.from(updatedCsvContent, "utf-8").toString("base64"),
         sha: existingCsvSha,
         committer: {
           name: "Your Name",
@@ -172,7 +182,7 @@ export async function POST(req: NextRequest) {
     if (!csvUpdateResponse.ok) {
       console.error("CSV update response error:", csvUpdateResponseData);
       throw new Error(
-        `GitHub API responded with status ${csvUpdateResponse.status}`,
+        `GitHub API responded with status ${csvUpdateResponse.status}`
       );
     }
 
@@ -181,7 +191,7 @@ export async function POST(req: NextRequest) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
       { message: "Error uploading file", error: error.message },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

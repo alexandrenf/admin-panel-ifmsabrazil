@@ -103,7 +103,7 @@ export default function Noticias() {
         >
           Add New Notícia
         </Button>
-        <Paper style={{ marginTop: "20px" }}>
+        <Paper style={{ marginTop: "20px", overflowX: "auto" }}>
           <Table>
             <TableHead>
               <TableRow>
@@ -117,7 +117,7 @@ export default function Noticias() {
             </TableHead>
             <TableBody>
               {data.map((row, index) => (
-                <TableRow key={index}>
+                <TableRow key={row.link}>
                   <TableCell>{row["dia-mes-ano"]}</TableCell>
                   <TableCell>{row.autor}</TableCell>
                   <TableCell>{row.titulo}</TableCell>
@@ -127,6 +127,7 @@ export default function Noticias() {
                       src={row["imagem-link"]}
                       alt={row.titulo}
                       width="100"
+                      loading="lazy"
                     />
                   </TableCell>
                   <TableCell>
