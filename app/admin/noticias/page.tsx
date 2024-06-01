@@ -18,7 +18,6 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import Papa from "papaparse";
 import Layout from "../../../components/Layout";
 
 interface Noticia {
@@ -45,17 +44,7 @@ export default function Noticias() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result = await response.json();
-      const csvContent = result.csvContent;
-      const parsed = Papa.parse<Noticia>(csvContent, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: (header) => header.trim(),
-        transform: (value, header) => value.trim(),
-      });
-      if (parsed.errors.length > 0) {
-        console.error("Parsing errors:", parsed.errors);
-      }
-      setData(parsed.data);
+      setData(result.csvData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }

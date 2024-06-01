@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import Papa from "papaparse";
+import { parse } from "csv-parse/sync";
+import { stringify } from "csv-stringify/sync";
 
-// Define the Noticia type based on the structure of your CSV data
-type Noticia = {
-  title: string;
-  date: string;
-  markdown: string;
+interface Noticia {
+  "dia-mes-ano": string;
+  autor: string;
+  titulo: string;
   resumo: string;
-  author: string;
-  imageFilename?: string;
-  forcarPaginaInicial: string;
-};
-
+  link: string;
+  "imagem-link": string;
+  "forcar-pagina-inicial": string;
+}
 
 export async function POST(req: NextRequest) {
   const { index } = await req.json();
   const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
-  const GITHUB_API_URL = `https://api.github.com/repos/alexandrenf/dataifmsabrazil/contents/noticias.csv`;
+  const REPO_OWNER = "alexandrenf";
+  const REPO_NAME = "dataifmsabrazil";
+  const GITHUB_API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/noticias.csv`;
 
   try {
     // Fetch the current CSV content
@@ -34,22 +35,117 @@ export async function POST(req: NextRequest) {
     const result = await response.json();
     const csvContent = Buffer.from(result.content, "base64").toString("utf-8");
 
-    // Parse the CSV content
-    const parsed = Papa.parse<Noticia>(csvContent, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => header.trim(),
-      transform: (value, header) => value.trim(),
+    // Parse the CSV content using csv-parse/sync
+    const parsedData: Noticia[] = parse(csvContent, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+      relax_column_count: true,
     });
 
-    // Remove the selected entry
-    const updatedData = parsed.data.filter((_, i) => i !== index);
-    const updatedCsv = Papa.unparse(updatedData, {
+    // Extract the markdown and image links
+    const { link, "imagem-link": imagemLink } = parsedData[index];
+
+    // Log the filenames for debugging
+    console.log(`Attempting to delete markdown file: ${link}`);
+    console.log(`Attempting to delete image file: ${imagemLink}`);
+
+    // Remove the selected entry from the CSV
+    const updatedData = parsedData.filter((_, i) => i !== index);
+    const updatedCsv = stringify(updatedData, {
       header: true,
     });
+
+    // Delete the markdown file from GitHub
+    const markdownUrl = link.replace(
+      "https://cdn.jsdelivr.net/gh/",
+      "https://api.github.com/repos/"
+    ).replace(
+      "dataifmsabrazil/",
+      "dataifmsabrazil/contents/"
+    );
+    const markdownResponse = await fetch(markdownUrl, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!markdownResponse.ok) {
+      throw new Error(
+        `Failed to fetch markdown file: ${markdownResponse.status}`
+      );
+    }
+
+    const markdownData = await markdownResponse.json();
+    const markdownDeleteResponse = await fetch(markdownUrl, {
+      method: "DELETE",
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: `Delete markdown file for notícia at index ${index}`,
+        sha: markdownData.sha,
+        committer: {
+          name: "Your Name",
+          email: "your-email@example.com",
+        },
+      }),
+    });
+
+    if (!markdownDeleteResponse.ok) {
+      throw new Error(
+        `Failed to delete markdown file: ${markdownDeleteResponse.status}`
+      );
+    }
+
+    // Delete the image file from GitHub
+    if (imagemLink) {
+      const imageUrl = imagemLink.replace(
+        "https://cdn.jsdelivr.net/gh/",
+        "https://api.github.com/repos/"
+      ).replace(
+        "dataifmsabrazil/",
+        "dataifmsabrazil/contents/"
+      );
+      const imageResponse = await fetch(imageUrl, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to fetch image file: ${imageResponse.status}`);
+      }
+
+      const imageData = await imageResponse.json();
+      const imageDeleteResponse = await fetch(imageUrl, {
+        method: "DELETE",
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: `Delete image file for notícia at index ${index}`,
+          sha: imageData.sha,
+          committer: {
+            name: "Your Name",
+            email: "your-email@example.com",
+          },
+        }),
+      });
+
+      if (!imageDeleteResponse.ok) {
+        throw new Error(
+          `Failed to delete image file: ${imageDeleteResponse.status}`
+        );
+      }
+    }
 
     // Update the CSV file on GitHub
-    const updateResponse = await fetch(GITHUB_API_URL, {
+    const csvUpdateResponse = await fetch(GITHUB_API_URL, {
       method: "PUT",
       headers: {
         Authorization: `token ${GITHUB_TOKEN}`,
@@ -66,9 +162,9 @@ export async function POST(req: NextRequest) {
       }),
     });
 
-    if (!updateResponse.ok) {
+    if (!csvUpdateResponse.ok) {
       throw new Error(
-        `GitHub API responded with status ${updateResponse.status}`,
+        `GitHub API responded with status ${csvUpdateResponse.status}`
       );
     }
 
