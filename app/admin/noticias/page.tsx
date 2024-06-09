@@ -102,18 +102,18 @@ export default function Noticias() {
           color="primary"
           onClick={() => router.push("/admin/noticias/create")}
         >
-          Add New Notícia
+          Adicionar nova Notícia
         </Button>
         <Paper style={{ marginTop: "20px", overflowX: "auto" }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Date</TableCell>
-                <TableCell>Author</TableCell>
-                <TableCell>Title</TableCell>
-                <TableCell>Summary</TableCell>
-                <TableCell>Image</TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell>Dia</TableCell>
+                <TableCell>Autor</TableCell>
+                <TableCell>Título</TableCell>
+                <TableCell>Resumo</TableCell>
+                <TableCell>Imagem</TableCell>
+                <TableCell>Ações</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

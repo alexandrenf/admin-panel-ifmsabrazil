@@ -136,7 +136,7 @@ export default function Layout({ children }) {
             {drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
           <Typography variant="h6" noWrap>
-            Admin Panel
+            Administrador IFMSA Brazil
           </Typography>
         </Toolbar>
       </AppBarStyled>

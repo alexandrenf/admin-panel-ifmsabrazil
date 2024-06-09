@@ -8,10 +8,10 @@ export default function Admin() {
         <Layout>
             <Container>
                 <Typography variant="h4" component="h1" gutterBottom>
-                    Admin Dashboard
+                    Seja bem vindo à area de administrdor da IFMSA Brazil!
                 </Typography>
                 <Typography variant="body1">
-                    Welcome to the admin panel. Use the sidebar to navigate through different sections.
+                    Aqui você vai poder editar áreas do site como: notícias, painel de EB e outras configurações.
                 </Typography>
             </Container>
         </Layout>

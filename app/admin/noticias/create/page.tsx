@@ -213,7 +213,7 @@ export default function CreateNoticia() {
               Criar nova notícia
             </TypographyCenter>
             <TextField
-              label="Title"
+              label="Título"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               fullWidth
@@ -221,7 +221,7 @@ export default function CreateNoticia() {
               variant="outlined"
             />
             <StyledFormControl fullWidth>
-              <InputLabel>Author</InputLabel>
+              <InputLabel>Autor</InputLabel>
               <Select
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
@@ -236,7 +236,7 @@ export default function CreateNoticia() {
             </StyledFormControl>
             {author === "Outros" && (
               <TextField
-                label="Specify Author"
+                label="Especifique o Autor"
                 value={otherAuthor}
                 onChange={(e) => setOtherAuthor(e.target.value)}
                 fullWidth
@@ -248,7 +248,7 @@ export default function CreateNoticia() {
               selected={date}
               onChange={(newDate: Date | null) => setDate(newDate || undefined)}
               dateFormat="dd/MM/yyyy"
-              placeholderText="Select a date"
+              placeholderText="Selecione uma data"
             />
             <TextField
               label="Resumo"
@@ -263,7 +263,7 @@ export default function CreateNoticia() {
               <MDEditor value={markdown} onChange={setMarkdown} height={400} />
             </div>
             <Typography variant="h6" component="p" gutterBottom>
-              Image Upload
+              Upload de Imagem
             </Typography>
             <FileInput type="file" onChange={handleImageChange} />
             {imagePreview && (
@@ -280,7 +280,7 @@ export default function CreateNoticia() {
               label="Forçar Página Inicial"
             />
             <StyledButton variant="contained" onClick={handleSubmit} fullWidth>
-              Submit
+              Criar Notícia
             </StyledButton>
           </StyledPaper>
         </Container>
